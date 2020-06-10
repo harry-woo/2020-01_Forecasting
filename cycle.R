@@ -50,7 +50,8 @@ gdp_irregular <- gdp_sa / gdp_sam * 100
 
 # 순환변동요인 계열 그래프로 표현
 autoplot(gdp_cycle, lwd = 1, col = "steelblue") +
-  geom_hline(yintercept = 100, linetype = "dashed", colour = "black")
+  geom_hline(yintercept = 100, lty = 2, col = "black") +
+  geom_vline(xintercept = 2017.75, lty = 2, col = "red")
 
-plot(gdp_cycle, main="순환변동요인", col="steelblue", ylab="", xlab="")
-  abline(h = 100, col = "red", lty = 2)
+# 기존 기준일과 대비해보고, 최근의 순환변동에 대한 코멘트로 마무리하면 되지 않을까?
+# 외환위기에 대한 코멘트

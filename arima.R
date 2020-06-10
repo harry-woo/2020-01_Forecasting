@@ -8,6 +8,8 @@ gdp_sa <- ts(gdp_d[,1]/1000, start=1982, frequency=4)
 gdp_sa_p <- ts(gdp_d[,2], start=1982, frequency=4)
 #gdp_sa_p = window(gdp_sa_p1, 2000, 2020)
 
+cbind(gdp_sa, gdp_sa_p)
+
 plot(gdp_sa_p, ylab="GDP", xlab="", col="steelblue")
 
 par(mfrow=c(1,2))
@@ -34,4 +36,5 @@ tsdiag(gdpp_fit)
 par(mfrow=c(1,1))
 plot(forecast(gdpp_fit, h=4), main="")
 forecast(gdpp_fit, h=4)
+
 ########################################
