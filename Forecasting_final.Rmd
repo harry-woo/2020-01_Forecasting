@@ -1,0 +1,20 @@
+---
+title: "Forecasting_Final"
+author: "Harry Woo"
+date: '2020 6 10 '
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#### GDP 계절조정계열(분기, 실질)을 바탕으로 다음 물음에 답하시오.(20점)
+
+#### (1) GDP의 추세변동을 HP필터를 이용하여 구하시오.
+
+
+
+#### (2) GDP의 순환변동치를 구하여 그래프로 그리고, 그 의미를 정리하시오.
+
+
