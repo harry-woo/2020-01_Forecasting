@@ -1,3 +1,11 @@
+
+# https://blogs.oracle.com/datascience/introduction-to-forecasting-with-arima-in-r
+# https://rstudio-pubs-static.s3.amazonaws.com/303786_f1b99d6b7e9346c4b1488a174bab839a.html
+# https://rc2e.com/timeseriesanalysis
+# https://otexts.com/fppkr/arima-r.html
+
+
+
 rm(list = ls())
 library(tseries)
 library(forecast)
@@ -5,11 +13,6 @@ library(gridExtra)
 library(ggfortify)
 library(zoo)
 library(dplyr)
-
-# https://blogs.oracle.com/datascience/introduction-to-forecasting-with-arima-in-r
-# https://rstudio-pubs-static.s3.amazonaws.com/303786_f1b99d6b7e9346c4b1488a174bab839a.html
-# https://rc2e.com/timeseriesanalysis
-# https://otexts.com/fppkr/arima-r.html
 
 #
 gdp <- read.csv("gdpq.csv", header = TRUE)

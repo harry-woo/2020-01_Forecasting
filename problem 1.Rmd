@@ -2,9 +2,171 @@
 title: "problem1"
 author: "Harry Woo"
 date: '2020 6 17 '
-output: html_document
+output:
+  word_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE}
+# Package Loading
+rm(list = ls())
+library(tseries)
+library(fabletools)
+library(forecast)
+library(grid)
+library(gridExtra)
+library(ggfortify)
+library(zoo)
+library(dplyr)
+theme_t <- theme(plot.title = element_text(size = 13, hjust = 0.5, vjust = 1.5, face = "bold"))
+
+# Data Loading
+gdp <- read.csv("gdpq.csv", header = TRUE)
+gdp_gr <- ts(gdp[,2], start=1982, frequency=4) # Growth Rate
+```
+
+```{r}
+# Check stationarity of original data
+autoplot(gdp_gr) + xlab("Time") + ylab("GDP Growth Rate") + theme_t + 
+  ggtitle(label = "전기대비 GDP 성장율 (계절조정, 분기별, 실질)") +
+  geom_hline(yintercept = 0, lty = 2, col = "black") +
+  geom_smooth(aes(x = as.Date(time(gdp_gr)), y = gdp_gr),
+              se = FALSE, method = "lm", lty = 1, col = "blue")
+
+acf1 <- ggAcf(gdp_gr) + ggtitle("상관도표") + theme_t
+pacf1 <- ggPacf(gdp_gr) + ggtitle("부분상관도표") + theme_t
+grid.arrange(acf1, pacf1, ncol = 2)
+
+adf.test(gdp_gr, alternative = "stationary", k = 0)
+```
+
+```{r}
+# Check stationarity of differenced data
+autoplot(diff(gdp_gr)) + xlab("Time") + ylab("GDP Growth Rate") + theme_t +
+  ggtitle(label = "전기대비 GDP 성장율 1차 차분 (계절조정, 분기별, 실질)") +
+  geom_hline(yintercept = 0, lty = 2, col = "black") +
+  geom_smooth(aes(x = as.Date(time(diff(gdp_gr))), y = diff(gdp_gr)),
+              se = FALSE, method = "lm", lty = 1, col = "blue")
+
+acf2 <- ggAcf(diff(gdp_gr)) + ggtitle("상관도표") + theme_t
+pacf2 <- ggPacf(diff(gdp_gr)) + ggtitle("부분상관도표") + theme_t
+grid.arrange(acf2, pacf2, ncol = 2)
+
+adf.test(diff(gdp_gr), alternative = "stationary", k = 0)
+
+data.frame("(0,1,1)" = Arima(gdp_gr, order = c(0, 1, 1))$aic,
+           "(2,1,0)" = Arima(gdp_gr, order = c(2, 1, 0))$aic)
+
+```
+
+```{r}
+# ARIMA fitting
+gdpp_fit = Arima(gdp_gr, order=c(0,1,1))
+gdpp_fit
+
+auto.arima(gdp_gr, seasonal = FALSE)
+```
+
+```{r}
+# Empty data frame
+df <- data.frame(p = double(), d = double(), q = double(), 
+                 aic = double(), aicc = double(), bic = double())
+
+# 과대적합 체크
+for(p in 0:4){
+  for(d in 0:1){
+    for(q in 0:2){
+      df <- rbind(df, data.frame(p = p, d = d, q = q, 
+                                 Arima(gdp_gr, order = c(p, d, q))[c("aic", "aicc", "bic")]))
+    }
+  }
+}
+
+df[df$aic == min(df$aic),]
+df[df$aicc == min(df$aicc),]
+df[df$bic == min(df$bic),]
+
+min(df$aicc)
+df$aic == df$aicc
+
+# Final Model
+gdpp_fit = Arima(gdp_gr, order=c(0,1,1))
+```
+
+```{r}
+
+# Check residuals
+resdiag <- attributes(ggtsdiag(gdpp_fit))
+
+
+
+# Grid
+grid.newpage()
+pushViewport(viewport(layout = grid.layout(2, 2)))
+define_region <- function(row, col){
+  viewport(layout.pos.row = row, layout.pos.col = col)
+} 
+print(resdiag$plots[[1]], vp = define_region(1, 1:2))
+print(resdiag$plots[[2]], vp = define_region(2, 1))
+print(resdiag$plots[[3]], vp = define_region(2, 2))
+
+```
+
+```{r}
+
+# Forecasting
+
+xlim <- c(as.yearqtr("2010-01-01", format = "%Y-%m-%d"),
+          as.yearqtr("2021-01-01", format = "%Y-%m-%d"))
+
+par(mfrow = c(1,2))
+plot(forecast(gdpp_fit, h = 4))
+plot(forecast(gdpp_fit, h = 4), xlim = xlim, ylim = c(-3, 3), main = "확대")
+
+forecast(gdpp_fit, h = 4)
+
+```
+
+```{r}
+# Subsetting Time Series for further analysis
+gdp_gr2 <- window(gdp_gr, 2000, 2020)
+auto.arima(gdp_gr2)
+gdpp_fit2 = Arima(gdp_gr2, order = c(0, 1, 1))
+
+par(mfrow = c(1,2))
+plot(forecast(gdpp_fit2, h = 4))
+plot(forecast(gdpp_fit2, h = 4), xlim = xlim, main = "확대")
+
+forecast(gdpp_fit2, h=4)
+```
+
+
+```{r}
+# 주석처리 모음
+
+# subsetting?
+# gdp_gr2 <- window(gdp_gr, 2000, 2020)
+
+# library(zoo)
+# gr <- as.zoo(gdp_gr)
+# index(gr)
+
+# 성장률은 로그변환 후 차분과 근사함. 일종의 차분을 통하여 추세가 제거됨.
+# gghistogram(gdp_gr, add.kde = TRUE)
+# shapiro.test(gdp_gr)
+
+# ggseasonplot(gdp_gr, year.labels = TRUE, year.labels.left = TRUE)
+# ggseasonplot(diff(gdp_gr), year.labels = TRUE, year.labels.left = TRUE)
+
+# 모든 자기상관도표는 시차 0에서 acf=1
+# 점선이 유의수준에 따른 기각역
+# 륭-박스 검정은 m차까지 자기상관관계가 존재하지 않는다는 귀무가설
+
+# spectrum(gdp_sa)
+# spectrum(gdp_gr)
+
 ```
