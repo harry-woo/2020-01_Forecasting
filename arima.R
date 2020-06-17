@@ -72,7 +72,7 @@ spectrum(gdp_gr)
 diff(diff(gdp_sa),4)
 diff(gdp_sa, 4)
 
-gdpp_fit = arima(gdp_gr, order=c(3,0,0))
+gdpp_fit = Arima(gdp_gr, order=c(1,1,1))
 gdpp_fit
 
 auto.arima(gdp_gr, seasonal = TRUE)
@@ -106,6 +106,7 @@ df
 ##########################################
 
 #과대적합
+
 gdpp_fit = arima(gdp_gr, order=c(3,0,1))
 gdpp_fit
 gdpp_fit = arima(gdp_gr, order=c(4,0,0))
@@ -122,3 +123,15 @@ forecast(gdpp_fit, h=4)
 
 ########################################
 
+
+gdp_gr2 <- window(gdp_gr, 2000, 2020)
+auto.arima(gdp_gr2)
+gdpp_fit2 = Arima(gdp_gr2, order = c(0, 1, 1))
+plot(forecast(gdpp_fit2, h=12), main="")
+forecast(gdpp_fit2, h=12)
+
+gdp_gr3 <- window(gdp_gr, 2010, 2020)
+auto.arima(gdp_gr3)
+gdpp_fit3 = Arima(gdp_gr3, order = c(1, 1, 1))
+plot(forecast(gdpp_fit3, h=12), main="")
+forecast(gdpp_fit2, h=12)
