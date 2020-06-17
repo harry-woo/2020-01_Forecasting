@@ -33,9 +33,9 @@ autoplot(gdp_sa_p, lwd = 1.2, col = "royalblue") + xlab("Time") + ylab("GDP Grow
   ggtitle(label = "전기대비 GDP 성장율 (계절조정계열, 분기별, 실질)") +
   geom_hline(yintercept = 0, lty = 2, col = "black")
 
-acf <- ggAcf(gdp_sa_p) + ggtitle("상관도표") +
+acf <- ggAcf(diff(gdp_sa_p)) + ggtitle("상관도표") +
   theme(plot.title = element_text(size = 18, hjust = 0.5, vjust = 1.5, face = "bold"))
-pacf <- ggPacf(gdp_sa_p) + ggtitle("부분상관도표") +
+pacf <- ggPacf(diff(gdp_sa_p)) + ggtitle("부분상관도표") +
   theme(plot.title = element_text(size = 18, hjust = 0.5, vjust = 1.5, face = "bold"))
 grid.arrange(acf, pacf, ncol = 2)
 
